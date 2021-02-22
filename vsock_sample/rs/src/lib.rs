@@ -130,14 +130,14 @@ fn test_socket() {
     use std::thread;
     println!("temp1.import~~");
 
-    let tempdir = tempfile::tempdir().unwrap();
-    println!("get temp dir: {:?}", &tempdir);
-    let sockname = tempdir.path().join("sock");
+    // let tempdir = tempfile::tempdir().unwrap();
+    // println!("get temp dir: {:?}", &tempdir);
+    // let sockname = tempdir.path().join("sock");
     println!("temp2~~");
     let s1 = socket(AddressFamily::Unix, SockType::Stream,
                     SockFlag::empty(), None).expect("socket failed");
     println!("temp3~~");
-    let sockaddr = SockAddr::new_unix(&sockname).unwrap();
+    let sockaddr = SockAddr::new_unix("/tmp/temp.sock").unwrap();
     println!("temp4~~");
     bind(s1, &sockaddr).expect("bind failed");
     println!("bind socket successfully");
