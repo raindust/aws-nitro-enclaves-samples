@@ -11,7 +11,6 @@ use nix::sys::socket::{AddressFamily, Shutdown, SockAddr, SockFlag, SockType};
 use nix::unistd::close;
 use std::convert::TryInto;
 use std::os::unix::io::{AsRawFd, RawFd};
-use tempfile;
 
 const VMADDR_CID_ANY: u32 = 0xFFFFFFFF;
 const BUF_MAX_LEN: usize = 8192;
@@ -140,13 +139,13 @@ fn test_socket() {
     println!("listen socket successfully");
 
     let thr = thread::spawn(move || {
-        println!("begin of client");
+        println!("&begin of client");
         let s2 = socket(AddressFamily::Unix, SockType::Stream, SockFlag::empty(), None)
             .expect("socket failed");
         connect(s2, &sockaddr).expect("connect failed");
         write(s2, b"hello").expect("write failed");
         close(s2).unwrap();
-        println!("end of client");
+        println!("&end of client");
     });
 
     let s3 = accept(s1).expect("accept failed");
@@ -154,7 +153,7 @@ fn test_socket() {
 
     let mut buf = [0;5];
     read(s3, &mut buf).unwrap();
-    println!("read message: {:?}", &buf);
+    println!("read message: {}", String::from_utf8(buf.to_vec()).unwrap());
     close(s3).unwrap();
     close(s1).unwrap();
     thr.join().unwrap();
