@@ -11,6 +11,7 @@ use nix::sys::socket::{AddressFamily, Shutdown, SockAddr, SockFlag, SockType};
 use nix::unistd::close;
 use std::convert::TryInto;
 use std::os::unix::io::{AsRawFd, RawFd};
+use tempfile;
 
 const VMADDR_CID_ANY: u32 = 0xFFFFFFFF;
 const BUF_MAX_LEN: usize = 8192;
@@ -103,6 +104,8 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
 
     listen_vsock(socket_fd, BACKLOG).map_err(|err| format!("Listen failed: {:?}", err))?;
 
+    test_socket();
+
     loop {
         let fd = accept(socket_fd).map_err(|err| format!("Accept failed: {:?}", err))?;
 
@@ -116,4 +119,41 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
                 .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?
         );
     }
+}
+
+fn test_socket() {
+    println!("begin of test socket");
+
+    use nix::sys::socket::{SockType, SockFlag};
+    use nix::sys::socket::{bind, socket, connect, listen, accept, SockAddr};
+    use nix::unistd::{read, write, close};
+    use std::thread;
+
+    let tempdir = tempfile::tempdir().unwrap();
+    let sockname = tempdir.path().join("sock");
+    let s1 = socket(AddressFamily::Unix, SockType::Stream,
+                    SockFlag::empty(), None).expect("socket failed");
+    let sockaddr = SockAddr::new_unix(&sockname).unwrap();
+    bind(s1, &sockaddr).expect("bind failed");
+    listen(s1, 10).expect("listen failed");
+
+    let thr = thread::spawn(move || {
+        let s2 = socket(AddressFamily::Unix, SockType::Stream, SockFlag::empty(), None)
+            .expect("socket failed");
+        connect(s2, &sockaddr).expect("connect failed");
+        write(s2, b"hello").expect("write failed");
+        close(s2).unwrap();
+    });
+
+    let s3 = accept(s1).expect("accept failed");
+
+    let mut buf = [0;5];
+    read(s3, &mut buf).unwrap();
+    close(s3).unwrap();
+    close(s1).unwrap();
+    thr.join().unwrap();
+
+    assert_eq!(&buf[..], b"hello");
+
+    println!("end of test socket");
 }
