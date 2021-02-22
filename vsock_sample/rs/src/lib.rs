@@ -128,17 +128,12 @@ fn test_socket() {
     use nix::sys::socket::{bind, socket, connect, listen, accept, SockAddr};
     use nix::unistd::{read, write, close};
     use std::thread;
-    println!("temp1.import~~");
 
-    // let tempdir = tempfile::tempdir().unwrap();
-    // println!("get temp dir: {:?}", &tempdir);
-    // let sockname = tempdir.path().join("sock");
-    println!("temp2~~");
     let s1 = socket(AddressFamily::Unix, SockType::Stream,
                     SockFlag::empty(), None).expect("socket failed");
-    println!("temp3~~");
-    let sockaddr = SockAddr::new_unix("/tmp/temp.sock").unwrap();
-    println!("temp4~~");
+    // we hard code socket name at /tmp directory
+    let sockname = "/tmp/temp.sock";
+    let sockaddr = SockAddr::new_unix(sockname).unwrap();
     bind(s1, &sockaddr).expect("bind failed");
     println!("bind socket successfully");
     listen(s1, 10).expect("listen failed");
