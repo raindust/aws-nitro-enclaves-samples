@@ -130,7 +130,7 @@ fn test_socket() {
     use std::thread;
 
     let tempdir = tempfile::tempdir().unwrap();
-    println!("get temp dir: {}", &tempdir);
+    println!("get temp dir: {:?}", &tempdir);
     let sockname = tempdir.path().join("sock");
     let s1 = socket(AddressFamily::Unix, SockType::Stream,
                     SockFlag::empty(), None).expect("socket failed");
