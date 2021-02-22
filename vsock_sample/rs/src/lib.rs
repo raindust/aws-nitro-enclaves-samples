@@ -130,25 +130,32 @@ fn test_socket() {
     use std::thread;
 
     let tempdir = tempfile::tempdir().unwrap();
+    println!("get temp dir: {}", &tempdir);
     let sockname = tempdir.path().join("sock");
     let s1 = socket(AddressFamily::Unix, SockType::Stream,
                     SockFlag::empty(), None).expect("socket failed");
     let sockaddr = SockAddr::new_unix(&sockname).unwrap();
     bind(s1, &sockaddr).expect("bind failed");
+    println!("bind socket successfully");
     listen(s1, 10).expect("listen failed");
+    println!("listen socket successfully");
 
     let thr = thread::spawn(move || {
+        println!("begin of client");
         let s2 = socket(AddressFamily::Unix, SockType::Stream, SockFlag::empty(), None)
             .expect("socket failed");
         connect(s2, &sockaddr).expect("connect failed");
         write(s2, b"hello").expect("write failed");
         close(s2).unwrap();
+        println!("end of client");
     });
 
     let s3 = accept(s1).expect("accept failed");
+    println!("access socket successfully");
 
     let mut buf = [0;5];
     read(s3, &mut buf).unwrap();
+    println!("read message: {:?}", &buf);
     close(s3).unwrap();
     close(s1).unwrap();
     thr.join().unwrap();
