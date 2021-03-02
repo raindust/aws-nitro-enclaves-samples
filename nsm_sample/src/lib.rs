@@ -125,7 +125,7 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
 fn test_nsm() {
     println!("begin of test nsm");
 
-    let mut attestation_buf = [0u8; 1024];
+    let mut attestation_buf = [0u8; 1024 * 1024];
     let mut random_buf = [0u8; 256];
     unsafe {
         let fd = nsm_lib_init();
