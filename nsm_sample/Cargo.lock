@@ -219,7 +219,6 @@ dependencies = [
  "log",
  "nix",
  "nsm-lib",
- "rand",
 ]
 
 [[package]]
