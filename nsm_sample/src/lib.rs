@@ -10,6 +10,7 @@ use nix::sys::socket::{accept, bind, connect, shutdown, socket};
 use nix::sys::socket::{AddressFamily, Shutdown, SockAddr, SockFlag, SockType};
 use nix::unistd::close;
 use nsm::{nsm_get_attestation_doc, nsm_get_random, nsm_lib_init};
+use rand::prelude::*;
 use std::convert::TryInto;
 use std::os::unix::io::{AsRawFd, RawFd};
 use std::ptr::null;
@@ -127,6 +128,9 @@ fn test_nsm() {
 
     let mut attestation_buf = [0u8; 1024];
     let mut random_buf = [0u8; 256];
+    let mut rng = rand::thread_rng();
+    let nonce: [u8; 8] = rng.gen();
+    println!("nonce is: {:?}", nonce);
     unsafe {
         let fd = nsm_lib_init();
         println!("fd: {}", fd);
@@ -135,8 +139,8 @@ fn test_nsm() {
             fd,
             null(),
             0,
-            null(),
-            0,
+            nonce.as_ptr(),
+            nonce.len() as u32,
             null(),
             0,
             attestation_buf.as_mut_ptr(),
