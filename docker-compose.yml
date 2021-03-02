@@ -1,0 +1,21 @@
+version: "3.2"
+
+services:
+  build-vsock:
+    container_name: build-vsock
+    image: tearust/dev:1.48
+    working_dir: /enclaves-sample/vsock_sample/rs
+    environment:
+      - CARGO_HOME=/enclaves-sample/.cargo
+    volumes:
+      - ./:/enclaves-sample
+    command: bash -c "cargo build --release"
+  build-nsm:
+    container_name: build-nsm
+    image: tearust/dev:1.48
+    working_dir: /enclaves-sample/nsm_sample
+    environment:
+      - CARGO_HOME=/enclaves-sample/.cargo
+    volumes:
+      - ./:/enclaves-sample
+    command: bash -c "cargo build --release"
