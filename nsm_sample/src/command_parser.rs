@@ -2,13 +2,17 @@ use clap::ArgMatches;
 
 #[derive(Debug, Clone)]
 pub struct ServerArgs {
+    pub cid: u32,
     pub port: u32,
+    pub log_port: u32,
 }
 
 impl ServerArgs {
     pub fn new_with(args: &ArgMatches) -> Result<Self, String> {
         Ok(ServerArgs {
+            cid: parse_cid_client(args)?,
             port: parse_port(args)?,
+            log_port: parse_log_port(args)?,
         })
     }
 }
