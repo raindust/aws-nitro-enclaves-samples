@@ -17,6 +17,7 @@ impl ServerArgs {
 pub struct ClientArgs {
     pub cid: u32,
     pub port: u32,
+    pub log_port: u32,
 }
 
 impl ClientArgs {
@@ -24,6 +25,7 @@ impl ClientArgs {
         Ok(ClientArgs {
             cid: parse_cid_client(args)?,
             port: parse_port(args)?,
+            log_port: parse_log_port(args)?,
         })
     }
 }
@@ -40,4 +42,12 @@ fn parse_port(args: &ArgMatches) -> Result<u32, String> {
         .ok_or("Could not find port argument")?;
     port.parse()
         .map_err(|_err| "port is not a number".to_string())
+}
+
+fn parse_log_port(args: &ArgMatches) -> Result<u32, String> {
+    let port = args
+        .value_of("log_port")
+        .ok_or("Could not find log port argument")?;
+    port.parse()
+        .map_err(|_err| "log port is not a number".to_string())
 }
