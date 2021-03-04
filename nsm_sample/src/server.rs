@@ -1,4 +1,3 @@
-use crate::nsm_test::test_nsm;
 use crate::protocol_helpers::{recv_loop, recv_u64};
 use nix::sys::socket::listen as listen_vsock;
 use nix::sys::socket::{accept, bind, socket, AddressFamily, SockAddr, SockFlag, SockType};

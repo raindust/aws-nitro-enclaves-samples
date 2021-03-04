@@ -31,15 +31,15 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     .map_err(|e| format!("{:?}", e))?;
 
     let vsocket = vsock_connect(args.cid, args.port)?;
-    let fd = vsocket.as_raw_fd();
+    send_data(vsocket.as_raw_fd(), "log".as_bytes())?;
 
-    send_data(fd, "log".as_bytes())?;
-
-    send_data(fd, "echo".as_bytes())?;
+    let vsocket = vsock_connect(args.cid, args.port)?;
+    send_data(vsocket.as_raw_fd(), "echo".as_bytes())?;
 
     // TODO: Replace this with your client code
+    let vsocket = vsock_connect(args.cid, args.port)?;
     let data = "Hello, from client!".to_string();
-    send_data(fd, data.as_bytes())?;
+    send_data(vsocket.as_raw_fd(), data.as_bytes())?;
 
     server_with_action(args.log_port, move |buf| {
         println!(
@@ -59,14 +59,16 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
         let buf = String::from_utf8(buf)
             .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?;
 
+        println!("server got message: {}", &buf);
         match buf.as_str() {
             "log" => {
                 CombinedLogger::init(vec![WriteLogger::new(
                     LevelFilter::Info,
                     Config::default(),
-                    LogWriter::new(log_port)?,
+                    LogWriter::new(log_port),
                 )])
                 .map_err(|e| format!("{:?}", e))?;
+                println!("log init successfully");
                 info!("log init successfully");
             }
             "echo" => info!("{}", &buf),
