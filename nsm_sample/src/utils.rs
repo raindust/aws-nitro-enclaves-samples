@@ -39,13 +39,6 @@ macro_rules! create_app {
                             .help("log-port")
                             .takes_value(true)
                             .required(true),
-                    )
-                    .arg(
-                        Arg::with_name("cid")
-                            .long("cid")
-                            .help("cid")
-                            .takes_value(true)
-                            .required(true),
                     ),
             )
             .subcommand(

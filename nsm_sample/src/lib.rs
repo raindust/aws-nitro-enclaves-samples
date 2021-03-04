@@ -33,7 +33,6 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
 /// Accept connections on a certain port and print
 /// the received data
 pub fn server(args: ServerArgs) -> Result<(), String> {
-    let cid = args.cid;
     let log_port = args.log_port;
     server_with_action(args.port, move |buf| {
         println!(
