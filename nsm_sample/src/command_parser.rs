@@ -50,7 +50,7 @@ fn parse_port(args: &ArgMatches) -> Result<u32, String> {
 
 fn parse_log_port(args: &ArgMatches) -> Result<u32, String> {
     let port = args
-        .value_of("log_port")
+        .value_of("log-port")
         .ok_or("Could not find log port argument")?;
     port.parse()
         .map_err(|_err| "log port is not a number".to_string())

@@ -3,4 +3,4 @@ FROM alpine:latest
 # copy the vsock-sample binary to the Docker file
 COPY target/x86_64-unknown-linux-musl/release/nsm_sample .
 # start the server application inside the enclave
-CMD ./nsm_sample server --port 5005 --cid 6 --log_port 5006
+CMD ./nsm_sample server --port 5005 --cid 6 --log-port 5006

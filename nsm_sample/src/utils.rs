@@ -32,6 +32,20 @@ macro_rules! create_app {
                             .help("port")
                             .takes_value(true)
                             .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("log-port")
+                            .long("log-port")
+                            .help("log-port")
+                            .takes_value(true)
+                            .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("cid")
+                            .long("cid")
+                            .help("cid")
+                            .takes_value(true)
+                            .required(true),
                     ),
             )
             .subcommand(
@@ -41,6 +55,13 @@ macro_rules! create_app {
                         Arg::with_name("port")
                             .long("port")
                             .help("port")
+                            .takes_value(true)
+                            .required(true),
+                    )
+                    .arg(
+                        Arg::with_name("log-port")
+                            .long("log-port")
+                            .help("log-port")
                             .takes_value(true)
                             .required(true),
                     )
