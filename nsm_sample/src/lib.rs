@@ -42,7 +42,7 @@ pub fn server(args: ServerArgs) -> Result<(), String> {
                 .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?
         );
 
-        let vsocket = vsock_connect(cid, log_port)?;
+        let vsocket = vsock_connect(libc::VMADDR_CID_HOST, log_port)?;
         let fd = vsocket.as_raw_fd();
         send_data(fd, "Hello, from server!".as_bytes())?;
 
