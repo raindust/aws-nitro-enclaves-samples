@@ -31,8 +31,9 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     ])
     .map_err(|e| format!("{:?}", e))?;
 
+    let log_port = args.log_port;
     std::thread::spawn(move || {
-        match server_with_action(args.log_port, move |buf| {
+        match server_with_action(log_port, move |buf| {
             println!(
                 "log from server: {}",
                 String::from_utf8(buf)
