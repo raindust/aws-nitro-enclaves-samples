@@ -14,6 +14,7 @@ use command_parser::{ClientArgs, ServerArgs};
 use simplelog::*;
 use std::fs::File;
 use std::os::unix::io::AsRawFd;
+use std::time::Duration;
 
 #[macro_use]
 extern crate log;
@@ -30,8 +31,22 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     ])
     .map_err(|e| format!("{:?}", e))?;
 
+    std::thread::spawn(move || {
+        match server_with_action(args.log_port, move |buf| {
+            println!(
+                "log from server: {}",
+                String::from_utf8(buf)
+                    .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?
+            );
+            Ok(())
+        }) {
+            Err(e) => println!("client server got error: {}", e),
+            _ => {}
+        }
+    });
+
     let vsocket = vsock_connect(args.cid, args.port)?;
-    send_data(vsocket.as_raw_fd(), "log".as_bytes())?;
+    send_data(vsocket.as_raw_fd(), "init".as_bytes())?;
 
     let vsocket = vsock_connect(args.cid, args.port)?;
     send_data(vsocket.as_raw_fd(), "echo".as_bytes())?;
@@ -41,38 +56,38 @@ pub fn client(args: ClientArgs) -> Result<(), String> {
     let data = "Hello, from client!".to_string();
     send_data(vsocket.as_raw_fd(), data.as_bytes())?;
 
-    server_with_action(args.log_port, move |buf| {
-        println!(
-            "log from server: {}",
-            String::from_utf8(buf)
-                .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?
-        );
-        Ok(())
-    })
+    std::thread::sleep(Duration::from_secs(3));
+    println!("timeout, close socket now...");
+    Ok(())
 }
 
 /// Accept connections on a certain port and print
 /// the received data
 pub fn server(args: ServerArgs) -> Result<(), String> {
     let log_port = args.log_port;
-    server_with_action(args.port, move |buf| {
+    let mut init = false;
+    server_with_action(args.port, |buf| {
         let buf = String::from_utf8(buf)
             .map_err(|err| format!("The received bytes are not UTF-8: {:?}", err))?;
 
+        if !init {
+            init = true;
+
+            CombinedLogger::init(vec![WriteLogger::new(
+                LevelFilter::Info,
+                Config::default(),
+                LogWriter::new(log_port),
+            )])
+            .map_err(|e| format!("{:?}", e))?;
+            println!("log init successfully");
+            info!("log init successfully");
+            return Ok(());
+        }
+
         println!("server got message: {}", &buf);
         match buf.as_str() {
-            "log" => {
-                CombinedLogger::init(vec![WriteLogger::new(
-                    LevelFilter::Info,
-                    Config::default(),
-                    LogWriter::new(log_port),
-                )])
-                .map_err(|e| format!("{:?}", e))?;
-                println!("log init successfully");
-                info!("log init successfully");
-            }
             "echo" => info!("{}", &buf),
-            _ => println!("{}", &buf),
+            _ => debug!("{}", &buf),
         }
 
         Ok(())
