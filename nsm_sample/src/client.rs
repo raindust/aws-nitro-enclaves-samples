@@ -7,11 +7,11 @@ use std::os::unix::io::{AsRawFd, RawFd};
 // Maximum number of connection attempts
 const MAX_CONNECTION_ATTEMPTS: usize = 5;
 
-pub fn send_data(fd: RawFd, buf: &[u8]) -> Result<(), String> {
+pub fn send_data(fd: RawFd, buf: &[u8]) -> Result<u64, String> {
     let len: u64 = buf.len().try_into().map_err(|err| format!("{:?}", err))?;
     send_u64(fd, len)?;
     send_loop(fd, &buf, len)?;
-    Ok(())
+    Ok(len)
 }
 
 /// Initiate a connection on an AF_VSOCK socket
